@@ -1,0 +1,41 @@
+.container {
+  position: relative;
+
+  .icon {
+    transform: translate(-50%,-50%);
+    width: 40px;
+    height: 30px;
+
+    .arrow {
+      position: absolute;
+      top: 12.5px;
+      width: 90%;
+      height: 5px;
+      background-color: #333;
+      box-shadow: 0 3px 5px rgba(0, 0, 0, .2);
+      animation: arrow 700ms linear infinite;
+      transform: rotate(-90deg);
+    }
+
+    .arrow::after, .arrow::before {
+      content: '';
+      position: absolute;
+      width: 60%;
+      height: 5px;
+      right: -4px;
+      background-color: #333;
+      transform: rotate(-90deg);
+    }
+
+    .arrow::after {
+      top: 6px;
+      transform: rotate(-45deg);
+    }
+
+    .arrow::before {
+      top: -6px;
+      box-shadow: 0 3px 5px rgba(0, 0, 0, .2);
+      transform: rotate(45deg);
+    }
+  }
+}

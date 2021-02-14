@@ -24,7 +24,7 @@ export class AuthService {
     });
   }
 
-  private async verifyAuthToken(token: string) {
+  public async verifyAuthToken(token: string) {
     const decodedToken = jwt.decode(token, { complete: true }) as { [key: string]: any };
 
     const { kid } = decodedToken?.header;

@@ -1,5 +1,5 @@
 import { Controller } from '@nestjs/common';
-import { MessagePattern } from '@nestjs/microservices';
+import { EventPattern, MessagePattern } from '@nestjs/microservices';
 import { DataService } from './data.service';
 
 @Controller('data')
@@ -33,5 +33,15 @@ export class DataController {
   async getCityData(data: string) {
     const { country, state, city } = JSON.parse(data);
     return this.dataService.loadSpecificCityData(country, state, city);
+  }
+
+  @EventPattern('subscribe-data')
+  onSubscribeData(id: string) {
+    this.dataService.subscribeData(id);
+  }
+
+  @EventPattern('unsubscribe-data')
+  onUnsubscribeData(id: string) {
+    this.dataService.unsubscribeData(id);
   }
 }

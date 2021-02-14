@@ -1,6 +1,6 @@
 import { HttpService, Injectable } from '@nestjs/common';
 import { config } from '../config';
-import { map } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import {
   CitiesResponse,
   CityResponse,
@@ -8,6 +8,11 @@ import {
   DataResponseStatus,
   StatesResponse
 } from '../shared/models/responses';
+import * as WebSocket from 'ws';
+import { Subject } from 'rxjs';
+import { RedisEvent } from '../shared/models/redis-event';
+import { RedisService } from '../redis/redis.service';
+import { CityData } from '../shared/models/city';
 
 const { apiKey } = config.IQAirVisual;
 const key = { key: apiKey };
@@ -15,10 +20,19 @@ const key = { key: apiKey };
 @Injectable()
 export class DataService {
 
+  dataSubscriptions: { [key: string]: number } = { };
+  eventSubject = new Subject<RedisEvent>();
+
   private readonly baseUrl: string;
 
-  constructor(private http: HttpService) {
+  constructor(private http: HttpService, private redisService: RedisService) {
     this.baseUrl = config.IQAirVisual.baseUrl;
+
+    this.eventSubject
+      .asObservable()
+      .subscribe(async ({ id, newData }) => {
+        return this.redisService.publish(id, newData);
+      });
   }
 
   async loadCountries(): Promise<string[]> {
@@ -40,7 +54,7 @@ export class DataService {
       .pipe(
         map(({ data }: { data: StatesResponse }) => {
           return (data.status === DataResponseStatus.SUCCESS) ? data.data.map((entry) => entry.state) : [ ];
-        })
+        }),
       )
       .toPromise();
   }
@@ -52,6 +66,10 @@ export class DataService {
       .pipe(
         map(({ data }: { data: CitiesResponse }) => {
           return (data.status === DataResponseStatus.SUCCESS) ? data.data.map((entry) => entry.city) : [ ]
+        }),
+        catchError((err) => {
+          console.error(err);
+          return [ ];
         })
       )
       .toPromise();
@@ -67,6 +85,10 @@ export class DataService {
       .pipe(
         map(({ data }: { data: CityResponse }) => {
           return (data.status === DataResponseStatus.SUCCESS) ? data.data : { }
+        }),
+        catchError((err) => {
+          console.error(err);
+          return [ ];
         })
       )
       .toPromise();
@@ -74,13 +96,65 @@ export class DataService {
 
   async loadSpecificCityData(country: string, state: string, city: string): Promise<any> {
     const params = { ...key, country, state, city };
-    return this.http
+    const cityData = await this.http
       .get(`${ this.baseUrl }/city`, { params })
       .pipe(
-        map(({ data }: { data: CityResponse }) => {
+        map(({ data }: { data: CityResponse, status: number, statusText: string }) => {
           return (data.status === DataResponseStatus.SUCCESS) ? data.data : { }
-        })
+        }),
       )
       .toPromise();
+
+    const id = `${ country }-${ state }-${ city }`;
+    if (!this.dataSubscriptions[ id ] || this.dataSubscriptions[ id ] === 0) {
+      const interval = setInterval(() => {
+        if (this.dataSubscriptions[ id ] === 0) {
+          clearInterval(interval);
+          return;
+        }
+
+        // const newData = mockUpdatedValues(cityData);
+        const newData = (() => {
+          const newData: CityData = JSON.parse(JSON.stringify(cityData));
+          newData.current.weather.wd += Utils.randomNumber(-40, 40, true);
+          newData.current.weather.ws += Utils.randomNumber(-2, 4, true);
+          newData.current.weather.tp += Utils.randomNumber(-1, 1);
+          newData.current.weather.hu += Utils.randomNumber(-0.5, 2, true);
+          return newData;
+        })();
+        this.eventSubject.next({ id, newData });
+        console.log(`Emitted updated value`);
+      }, 1200);
+    }
+
+    return cityData;
+  }
+
+  public subscribeData(id: string) {
+    if (!this.dataSubscriptions[ id ]) this.dataSubscriptions[ id ] = 1;
+    else this.dataSubscriptions[ id ]++;
+
+    if (this.dataSubscriptions[ id ] === 1) {
+      // this.ws.send(JSON.stringify({ type: 'subscribe', id }));
+      console.log(`Subscribe sent for ${ id }`);
+    }
+  }
+
+  public unsubscribeData(id: string) {
+    if (this.dataSubscriptions[ id ] == null) return;
+    if (this.dataSubscriptions[ id ] > 0) {
+      this.dataSubscriptions[ id ]--;
+      if (this.dataSubscriptions[ id ] === 0) {
+        console.log(`Unsubscribe sent for ${ id }`);
+        // this.ws.send(JSON.stringify({ type: 'unsubscribe', id }));
+      }
+    }
+  }
+}
+
+class Utils {
+  public static randomNumber(min: number, max: number, round: boolean = false) {
+    const random = Math.random() * (max - min) + min;
+    return round ? Math.floor(random) : random;
   }
 }

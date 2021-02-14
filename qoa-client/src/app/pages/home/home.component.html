@@ -1,0 +1,101 @@
+<section class="section" *ngIf="countries">
+
+  <div class="container country" *ngIf="selectedCountry">
+    <span class="clear" (click)="clear('country')">&#10006;</span>
+    <span class="name">Country: {{ selectedCountry }}</span>
+  </div>
+  <ul *ngIf="!selectedCountry">
+    <li class="country" *ngFor="let country of countries" (click)="onCountrySelected(country)" >
+      {{ country }}
+    </li>
+  </ul>
+
+  <div class="container state" *ngIf="selectedState">
+    <span class="clear" (click)="clear('state')">&#10006;</span>
+    <span class="name">State: {{ selectedState }}</span>
+  </div>
+  <ul *ngIf="!selectedState">
+    <li class="state" *ngFor="let state of states" (click)="onStateSelected(state)">
+      {{ state }}
+    </li>
+    <li class="state error" *ngIf="statesError">No active weather stations were found in {{ selectedCountry }}</li>
+  </ul>
+
+  <div class="container city" *ngIf="selectedCity">
+    <span class="clear" (click)="clear('city')">&#10006;</span>
+    <span class="name">City: {{ selectedCity }}</span>
+  </div>
+  <ul *ngIf="!selectedCity">
+    <li class="city" *ngFor="let city of cities" (click)="onCitySelected(city)">
+      {{ city }}
+    </li>
+    <li class="city error" *ngIf="citiesError">No active weather stations were found in {{ selectedCountry }}, {{ selectedState }}</li>
+  </ul>
+
+  <div class="data-container" *ngIf="cityData">
+    <div class="info">
+      <div class="weather">
+        <h3>Weather</h3>
+        <table mat-table [dataSource]="weatherData">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Information</th>
+            <td mat-cell *matCellDef="let entry">{{ entry.name }}</td>
+          </ng-container>
+          <ng-container matColumnDef="value">
+            <th mat-header-cell class="cell-center" *matHeaderCellDef>Value</th>
+            <td mat-cell class="cell-center" *matCellDef="let entry">
+              <div class="centered" *ngIf="![ 'wd', 'ic' ].includes(entry.code)">{{ entry.value }}</div>
+              <div class="centered" *ngIf="entry.code === 'ic'">
+                <img class="weather-img" [src]="weatherImg(entry.value)" alt="Weather">
+              </div>
+              <div class="centered" *ngIf="entry.code === 'wd'">
+                <app-arrow [rotation]="cityData.current.weather.wd"></app-arrow>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+
+      <div class="pollution">
+        <h3>Pollution</h3>
+        <table mat-table [dataSource]="pollutionData">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Information</th>
+            <td mat-cell *matCellDef="let entry">{{ entry.name }}</td>
+          </ng-container>
+          <ng-container matColumnDef="value">
+            <th mat-header-cell class="cell-center" *matHeaderCellDef>Value</th>
+            <td mat-cell class="cell-center" *matCellDef="let entry">
+              <div class="pollution-cell-content">
+                <span>{{ entry.value }}</span>
+                <div matTooltipPosition="above" [matTooltip]="aqiExplained(entry.value)" class="dot"
+                     [ngClass]="aqi(entry.value)" *ngIf="[ 'aqius', 'aqicn' ].includes(entry.code)"></div>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+    </div>
+    <div class="map" *ngIf="cityData">
+      <google-map
+        #googleMap
+        width="100%"
+        [zoom]="googleMapZoom"
+        [center]="googleMapCenter"
+        [options]="googleMapOptions"
+      >
+        <map-marker
+          [options]="mapMarkerOptions"
+          [position]="{ lat: cityData.location.coordinates[1], lng: cityData.location.coordinates[0] }"
+          [label]="{ color: 'black', text: cityData.city, fontWeight: 'bold', margin: '2rem' }"
+        ></map-marker>
+      </google-map>
+    </div>
+  </div>
+</section>

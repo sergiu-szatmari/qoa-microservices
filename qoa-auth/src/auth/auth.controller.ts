@@ -11,7 +11,14 @@ export class AuthController {
   @MessagePattern({ cmd: 'verify-auth-header' })
   async verifyAuthHeader(authHeader: string): Promise<boolean> {
     const isValid = await this.authService.verifyAuthHeader(authHeader);
-    console.log(`Header is ${ isValid ? green('valid') : red('not valid') } (${ authHeader })`);
+    console.log(`Header is ${ isValid ? green('valid') : red('not valid') } (${ authHeader.slice('Bearer '.length, 20) }....)`);
+    return isValid;
+  }
+
+  @MessagePattern({ cmd: 'verify-token' })
+  async verifyToken(token: string): Promise<boolean> {
+    const isValid = await this.authService.verifyAuthToken(token);
+    console.log(`Token is ${ isValid ? green('valid') : red('not valid') } (${ token.slice(0, 20) }...)`);
     return isValid;
   }
 }

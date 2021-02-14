@@ -1,0 +1,136 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.section {
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+  min-height: 100%;
+  //height: 100%;
+
+  padding: 24px;
+
+  .container {
+    user-select: none;
+    align-self: center;
+
+    &.country { font-size: 18px; }
+    &.state { font-size: 16px; }
+    &.city { font-size: 14px; }
+
+    padding: 8px 10px;
+    background-color: var(--primary-color);
+    border-radius: 12px;
+    max-width: 300px;
+    margin-bottom: 16px;
+    color: white;
+
+    .clear {
+      user-select: none;
+      cursor: pointer;
+      color: #f33131;
+      &:hover { color: #c62626; }
+
+      margin-right: 8px;
+    }
+  }
+
+  ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: space-between;
+
+    li {
+      margin-right: 10px;
+
+      user-select: none;
+      cursor: pointer;
+      font-size: 18px;
+      padding: 8px;
+      border: 2px solid var(--primary-color);
+      border-radius: 12px;
+      max-width: 300px;
+      margin-bottom: 8px;
+      animation: .5s ease-in-out;
+
+      &.country { font-size: 18px; }
+      &.state { font-size: 16px; }
+      &.city { font-size: 14px; }
+
+      &:hover { background-color: var(--primary-color); color: white; animation: .5s ease-in-out; }
+
+      &.error {
+        border-color: #ff5348;
+        background-color: unset;
+        font-weight: bold;
+        color: #333;
+        cursor: default;
+        margin: auto;
+      }
+    }
+  }
+
+  .data-container {
+    display: flex;
+    flex-direction: row;
+    & > * { flex: 1; }
+
+    .map { margin: auto; }
+    .info {
+      width: 100%;
+
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+
+      .pollution { margin-top: 32px; }
+
+      h3 { text-align: center; text-decoration: underline; }
+
+      table {
+        width: 60%;
+        margin: auto;
+
+        .centered {
+          display: flex;
+          justify-content: center;
+
+          img.weather-img {
+            max-height: 50px;
+          }
+        }
+
+        .pollution-cell-content {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+
+          .dot {
+            margin-left: 16px;
+            height: 12px;
+            width: 12px;
+            border-radius: 50%;
+            background-color: pink;
+
+            &.aqi-1 { background-color: var(--color-qoa-good); }
+            &.aqi-2 { background-color: var(--color-qoa-moderate); }
+            &.aqi-3 { background-color: var(--color-qoa-unhealthy-groups); }
+            &.aqi-4 { background-color: var(--color-qoa-unhealthy); }
+            &.aqi-5 { background-color: var(--color-qoa-very-unhealthy); }
+            &.aqi-6 { background-color: var(--color-qoa-hazardous); }
+          }
+        }
+      }
+    }
+  }
+}
+

@@ -3,10 +3,13 @@ import { DataController } from './data.controller';
 import { SharedModule } from '../shared/shared.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { config } from '../config';
+import { DataGateway } from './data.gateway';
+import { RedisModule } from '../redis/redis.module';
 
 @Module({
   imports: [
     SharedModule,
+    RedisModule,
     ClientsModule.register([{
       name: 'DATA_SERVICE',
       transport: Transport.TCP,
@@ -16,6 +19,7 @@ import { config } from '../config';
       }
     }]),
   ],
-  controllers: [ DataController ]
+  controllers: [ DataController ],
+  providers: [ DataGateway ]
 })
 export class DataModule {}

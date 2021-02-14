@@ -1,0 +1,27 @@
+:root {
+  --primary-color: #1976d2;
+
+  --color-qoa-good: #a8e05f;
+  --color-qoa-moderate: #facf39;
+  --color-qoa-unhealthy-groups: #ff9b57;
+  --color-qoa-unhealthy: #f65e5f;
+  --color-qoa-very-unhealthy: #a070b6;
+  --color-qoa-hazardous: #a06a7b;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  background-color: var(--primary-color);
+  height: calc(100% - 60px);
+}
+
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.cell-center {
+  text-align: center !important;
+}

@@ -3,7 +3,7 @@ import { AuthGuard } from '../shared/guards/auth.guard';
 import { ClientProxy } from '@nestjs/microservices';
 
 @Controller()
-// @UseGuards(AuthGuard)
+@UseGuards(AuthGuard)
 export class DataController {
 
   constructor(@Inject('DATA_SERVICE') private dataClient: ClientProxy) { }
@@ -27,7 +27,7 @@ export class DataController {
     return this.dataClient.send({ cmd: 'get-states' }, country).toPromise();
   }
 
-  @Get(':country/:state/')
+  @Get(':country/:state')
   public async getCities(
     @Param('country') country: string,
     @Param('state') state: string
