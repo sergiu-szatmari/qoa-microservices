@@ -30,13 +30,12 @@ export class DataGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.redisService
       .fromEvent<RedisEvent>('data')
       .subscribe(({ id, newData }) => {
-        const set = this.dataSubscriptions[ id ];
         console.log(`id: `, id);
-        console.table(set);
-        if (set) for (const client of set) client.emit('message', { id, data: newData });
-        // this.dataSubscriptions[ id ]?.forEach(client => {
-        //   client.emit('message', { id, data: newData });
-        // })
+        if (this.dataSubscriptions[ id ]) console.table(this.dataSubscriptions[ id ]);
+
+        this.dataSubscriptions[ id ]?.forEach(client => {
+          client.emit('message', { id, data: newData });
+        })
       });
   }
 
@@ -54,15 +53,11 @@ export class DataGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   async handleDisconnect(client: Socket) {
-    const keys = Object.keys(this.dataSubscriptions);
-    console.log(`[ handleDisconnect ] keys: `, keys);
-    if (keys) for (const key of keys) if (this.dataSubscriptions[ key ]?.delete(client)) { }
-    // Object.keys(this.dataSubscriptions).forEach((key: string) => {
-    //   if (this.dataSubscriptions[ key ]?.delete(client)) {
-    //     // Unsubscribe from data microservice
-    //   }
-    // });
-
+    Object.keys(this.dataSubscriptions)?.forEach(key => {
+      if (this.dataSubscriptions[ key ]?.delete(client)) {
+        // Unsubscribe from data microservice
+      }
+    })
     this.logSubscriptions();
     console.log({ client: client.id, event: 'Client disconnected' });
   }
@@ -92,8 +87,8 @@ export class DataGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     this.dataSubscriptions[ id ]?.delete(client);
 
-    // // Unsubscribe from data microservice
-    // this.dataClient.emit('unsubscribe-data', id);
+    // Unsubscribe from data microservice
+    this.dataClient.emit('unsubscribe-data', id);
 
     this.logSubscriptions();
     console.log({ client: client.id, event: 'unsubscribe', id });

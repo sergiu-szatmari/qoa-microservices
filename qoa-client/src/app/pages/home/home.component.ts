@@ -75,22 +75,6 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   async loadData() {
     this.countries = await this.dataService.getCountries();
-    // this.countries = [ 'a' ];
-    // this.cityData = await this.dataService.getCityData('Romania', 'Brasov', 'Brasov');
-    // this.cityData = {
-    //   city: 'Brasov',
-    //   state: 'Brasov',
-    //   country: 'Romania',
-    //   location: { type: 'Point', coordinates: [ 23.557522, 46.089795 ] },
-    //   current: {
-    //     weather: { ts: new Date(), tp: 10.0, pr: 1, hu: 20, ws: 5, wd: 122, ic: '02n' },
-    //     pollution: { ts: new Date(), aqius: 55, mainus: 'asd', aqicn: 122, maincn: 'asd' }
-    //   }
-    // }
-    // await Promise.all([
-    //   this.initMap(),
-    //   this.mapTableProperties()
-    // ]);
   }
 
   async onCountrySelected(country: string) {

@@ -8,7 +8,6 @@ import {
   DataResponseStatus,
   StatesResponse
 } from '../shared/models/responses';
-import * as WebSocket from 'ws';
 import { Subject } from 'rxjs';
 import { RedisEvent } from '../shared/models/redis-event';
 import { RedisService } from '../redis/redis.service';
@@ -113,18 +112,18 @@ export class DataService {
           return;
         }
 
-        // const newData = mockUpdatedValues(cityData);
         const newData = (() => {
           const newData: CityData = JSON.parse(JSON.stringify(cityData));
-          newData.current.weather.wd += Utils.randomNumber(-40, 40, true);
-          newData.current.weather.ws += Utils.randomNumber(-2, 4, true);
+          newData.current.weather.wd += Utils.randomNumber(-10, 10, true);
+          newData.current.weather.ws += Utils.randomNumber(-0.5, 1, true);
           newData.current.weather.tp += Utils.randomNumber(-1, 1);
           newData.current.weather.hu += Utils.randomNumber(-0.5, 2, true);
+          newData.current.weather.ts = new Date();
           return newData;
         })();
         this.eventSubject.next({ id, newData });
-        console.log(`Emitted updated value`);
-      }, 1200);
+        console.log(`Emitted updated value for ${ id }`);
+      }, 3000);
     }
 
     return cityData;

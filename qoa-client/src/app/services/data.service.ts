@@ -29,6 +29,7 @@ export class DataService {
 
     this.socket.on('connect', () => { console.log('[ Socket ] Connected to server'); });
     this.socket.on('error', (err => { console.error(err); }));
+    this.socket.on('disconnect', () => { console.log('[ Socket ] Disconnected'); });
     this.socket.on('message', ({ id, data }: { id: string, data: CityData }) => {
       if (this.subjects[ id ]) this.subjects[ id ].next(data);
     });
