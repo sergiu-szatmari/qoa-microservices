@@ -1,20 +1,20 @@
 export const config = {
   api: {
-    port: (process.env.PORT || 8080) as number,
+    port: parseInt(process.env.PORT) || 8080
   },
   ws: {
-    port: (process.env.WS_PORT || 8079) as number,
+    port: parseInt(process.env.WS_PORT) || 8079
   },
   auth: {
     host: process.env.AUTH_HOST || '127.0.0.1',
-    port: (process.env.AUTH_PORT || 8081) as number
+    port: parseInt(process.env.AUTH_PORT) || 8081
   },
   data: {
     host: process.env.DATA_HOST || '127.0.0.1',
-    port: (process.env.DATA_PORT || 8082) as number
+    port: parseInt(process.env.DATA_PORT) || 8082
   },
   redis: {
     host: process.env.REDIS_HOST || '127.0.0.1',
-    port: (process.env.REDIS_PORT || 6379) as number
+    port: parseInt(process.env.REDIS_PORT) || 6379
   }
 };

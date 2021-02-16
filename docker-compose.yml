@@ -1,0 +1,40 @@
+version: '3'
+services:
+  web:
+    build: './qoa-client'
+    ports:
+      - 4200:80
+      - 80:80
+
+  redis:
+    image: redis:alpine
+    restart: always
+
+  auth:
+    build: './qoa-auth'
+    environment:
+      AUTH_HOST: auth
+      AUTH_PORT: 8081
+
+  data:
+    build: './qoa-data'
+    environment:
+      DATA_HOST: data
+      DATA_PORT: 8082
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+  api:
+    build: './qoa-api'
+    ports:
+      - 8080:8080   # REST
+      - 8079:8079   # WebSocket
+    environment:
+      PORT: 8080
+      WS_PORT: 8079
+      AUTH_HOST: auth
+      AUTH_PORT: 8081
+      DATA_HOST: data
+      DATA_PORT: 8082
+      REDIS_HOST: redis
+      REDIS_PORT: 6379

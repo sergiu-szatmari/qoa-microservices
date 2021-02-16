@@ -11,7 +11,7 @@ import { Inject, UseGuards } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { RedisService } from '../redis/redis.service';
 import { WsAuthGuard } from '../shared/guards/ws-auth.guard';
-import { CityData } from '../../../qoa-data/dist/shared/models/city';
+import { CityData } from '../shared/models/city';
 
 interface RedisEvent {
   id: string;
@@ -30,9 +30,13 @@ export class DataGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.redisService
       .fromEvent<RedisEvent>('data')
       .subscribe(({ id, newData }) => {
-        this.dataSubscriptions[ id ].forEach(client => {
-          client.emit('message', { id, data: newData });
-        })
+        const set = this.dataSubscriptions[ id ];
+        console.log(`id: `, id);
+        console.table(set);
+        if (set) for (const client of set) client.emit('message', { id, data: newData });
+        // this.dataSubscriptions[ id ]?.forEach(client => {
+        //   client.emit('message', { id, data: newData });
+        // })
       });
   }
 
@@ -50,11 +54,14 @@ export class DataGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   async handleDisconnect(client: Socket) {
-    Object.keys(this.dataSubscriptions).forEach((key: string) => {
-      if (this.dataSubscriptions[ key ]?.delete(client)) {
-        // Unsubscribe from data microservice
-      }
-    });
+    const keys = Object.keys(this.dataSubscriptions);
+    console.log(`[ handleDisconnect ] keys: `, keys);
+    if (keys) for (const key of keys) if (this.dataSubscriptions[ key ]?.delete(client)) { }
+    // Object.keys(this.dataSubscriptions).forEach((key: string) => {
+    //   if (this.dataSubscriptions[ key ]?.delete(client)) {
+    //     // Unsubscribe from data microservice
+    //   }
+    // });
 
     this.logSubscriptions();
     console.log({ client: client.id, event: 'Client disconnected' });
