@@ -97,11 +97,7 @@ export class DataService {
     const params = { ...key, country, state, city };
     const cityData = await this.http
       .get(`${ this.baseUrl }/city`, { params })
-      .pipe(
-        map(({ data }: { data: CityResponse, status: number, statusText: string }) => {
-          return (data.status === DataResponseStatus.SUCCESS) ? data.data : { }
-        }),
-      )
+      .pipe(map(extractCityData))
       .toPromise();
 
     const id = `${ country }-${ state }-${ city }`;
@@ -112,42 +108,39 @@ export class DataService {
           return;
         }
 
-        const newData = (() => {
-          const newData: CityData = JSON.parse(JSON.stringify(cityData));
-          newData.current.weather.wd += Utils.randomNumber(-10, 10, true);
-          newData.current.weather.ws += Utils.randomNumber(-0.5, 1, true);
-          newData.current.weather.tp += Utils.randomNumber(-1, 1);
-          newData.current.weather.hu += Utils.randomNumber(-0.5, 2, true);
-          newData.current.weather.ts = new Date();
-          return newData;
-        })();
+        const newData = generateRandomData();
         this.eventSubject.next({ id, newData });
         console.log(`Emitted updated value for ${ id }`);
       }, 3000);
     }
 
     return cityData;
+
+    function generateRandomData() {
+      const newData: CityData = JSON.parse(JSON.stringify(cityData));
+      newData.current.weather.wd += Utils.randomNumber(-10, 10, true);
+      newData.current.weather.ws += Utils.randomNumber(-0.5, 1, true);
+      newData.current.weather.tp += Utils.randomNumber(-1, 1);
+      newData.current.weather.hu += Utils.randomNumber(-0.5, 2, true);
+      newData.current.weather.ts = new Date();
+      return newData;
+    }
+
+    function extractCityData({ data }: { data: CityResponse, status: number, statusText: string }) {
+      if (data.status === DataResponseStatus.SUCCESS)
+        return data.data;
+      return { };
+    }
   }
 
   public subscribeData(id: string) {
     if (!this.dataSubscriptions[ id ]) this.dataSubscriptions[ id ] = 1;
     else this.dataSubscriptions[ id ]++;
-
-    if (this.dataSubscriptions[ id ] === 1) {
-      // this.ws.send(JSON.stringify({ type: 'subscribe', id }));
-      console.log(`Subscribe sent for ${ id }`);
-    }
   }
 
   public unsubscribeData(id: string) {
     if (this.dataSubscriptions[ id ] == null) return;
-    if (this.dataSubscriptions[ id ] > 0) {
-      this.dataSubscriptions[ id ]--;
-      if (this.dataSubscriptions[ id ] === 0) {
-        console.log(`Unsubscribe sent for ${ id }`);
-        // this.ws.send(JSON.stringify({ type: 'unsubscribe', id }));
-      }
-    }
+    if (this.dataSubscriptions[ id ] > 0) this.dataSubscriptions[ id ]--;
   }
 }
 
